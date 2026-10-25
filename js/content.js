@@ -26,9 +26,17 @@ window.SITE = {
       kind: "Quant · Python, pandas",
       theme: "quant",
       blurb:
-        "Tests a moving-average crossover strategy against buy-and-hold on real stock prices, with no lookahead bias. " +
-        "Pick a stock and dates, then drag the averages or tap a preset to re-run it.",
-      stack: ["Python", "pandas", "yfinance", "risk management"],
+        "Does a simple trading rule beat just buying and holding a stock? This is my Python backtester running in your browser " +
+        "on real prices, with the same settings, modes, printout and charts.",
+      stack: ["Python", "pandas", "yfinance", "matplotlib"],
+      howToTitle: "How it works",
+      howTo: [
+        "<b>The rule:</b> hold the stock while its fast moving average (the average price over the last few days) is above its slow moving average, and sit in cash otherwise.",
+        "<b>No cheating:</b> each trade happens the day after the signal, so the strategy only uses information it would really have had. Every trade pays the fee.",
+        "<b>Pick a MODE:</b> <code>single</code> tests one pair of averages and draws its trades; <code>sweep</code> tests many pairs and colours a heatmap; <code>multi_stock</code> runs the same settings on several stocks and ranks them.",
+        "<b>Change any setting</b> and it re-runs instantly. The command line updates too, so you can paste it into the real Python tool and get the same numbers.",
+        "<b>Reading it:</b> the question is always \"did it beat buy &amp; hold?\" In a sweep, a green cluster suggests a real pattern; one lone green cell is probably luck.",
+      ],
     },
     {
       id: "clipcourt",
@@ -40,6 +48,12 @@ window.SITE = {
         "Turns basketball footage into made/miss highlight clips, a shot chart and per-player stats. " +
         "Mark the rim once and the pipeline does the rest.",
       stack: ["YOLOv8", "OpenCV", "FastAPI"],
+      howToTitle: "How it works",
+      howTo: [
+        "ClipCourt watches basketball video, finds the ball and the rim with a YOLOv8 model, and decides whether each shot went in.",
+        "This demo simulates a game in the same output format: every dot on the court is one shot. <b>Orange</b> dots went in, <b>hollow</b> dots missed.",
+        "Filter to made or missed shots, read shooting % by zone (paint, mid-range, three), and press <b>Simulate another game</b> for a new one.",
+      ],
     },
     {
       id: "sat",
@@ -52,6 +66,11 @@ window.SITE = {
         "7 study modes. Try a quick round in its style.",
       stack: ["JavaScript", "CI/CD", "accessibility"],
       live: "https://ishaan7497.github.io/SAT-VOCAB-LAB/",
+      howTo: [
+        "Read the sentence and decide which way it leans before looking at the choices: positive or negative, more or less.",
+        "Click the word that fits the blank. You'll hear whether you were right and see the pair of opposites the app teaches.",
+        "Five questions per round. The full app adds flashcards, matching, meaning groups and all 349 words.",
+      ],
     },
     {
       id: "cricket",
@@ -63,6 +82,14 @@ window.SITE = {
         "Hand cricket against an adaptive CPU, controlled only by your fingers through a webcam. " +
         "This is the real game ported to the browser: same screens, gestures and match engine.",
       stack: ["MediaPipe", "OpenCV", "Python", "state machine"],
+      howTo: [
+        "<b>Controls:</b> press <b>Turn on camera</b>, show a number with your fingers and hold it until the ring in the top-right fills (about a second). No camera? Click the cards, use the buttons under the game, or press number keys (0 = 10).",
+        "<b>Set up:</b> choose a format (Classic 1–6, Extended 1–10 or Crazy) and how smart the CPU is.",
+        "<b>Toss:</b> call odd or even, then throw 1 or 2. The CPU throws too and the total decides who wins. The winner picks bat or bowl.",
+        "<b>Batting:</b> you score the number you show, unless the CPU shows the same number. Then you're out and the innings ends.",
+        "<b>Bowling:</b> try to show the same number as the CPU to get it out. The second innings chases the first score; a tie goes to a 6-ball super over.",
+        "<b>Crazy mode:</b> numbers next to each other (like 4 and 5, or 10 and 1) are out, and the same number scores its square (7 and 7 = 49 runs).",
+      ],
     },
     {
       id: "oddoreve",
@@ -74,6 +101,13 @@ window.SITE = {
         "The original command-line version of hand cricket that Hand Cricket CV grew from: three modes, " +
         "an odd/eve toss and super overs, running here in a terminal.",
       stack: ["Python", "standard library", "pytest"],
+      howTo: [
+        "Type an answer and press Enter, or tap one of the quick answers under the terminal.",
+        "<b>Mode:</b> 1 for numbers 1 to 6, 2 for 1 to 10, 3 for CRAZY.",
+        "<b>Toss:</b> type <code>odd</code> or <code>eve</code>, then 1 or 2. The computer adds its number; if the total matches your call, you choose <code>bat</code> or <code>bowl</code>.",
+        "<b>Batting:</b> type a number and you score it, unless the computer bowled the same number. Then you're out.",
+        "<b>Bowling:</b> type a number to try to match the computer's and get it out. The second innings chases the first score; a tie goes to a super over.",
+      ],
     },
     {
       id: "hangman",
@@ -85,6 +119,11 @@ window.SITE = {
         "Hangman with progressive drawings, input validation and win/loss detection. " +
         "This version uses finance vocabulary.",
       stack: ["Python"],
+      howTo: [
+        "Guess the hidden finance word one letter at a time: click the letters or type them on your keyboard.",
+        "Each wrong letter adds a part to the drawing. Six wrong guesses and the round is lost.",
+        "Use the hint if you're stuck, then press <b>New word</b> to play again.",
+      ],
     },
   ],
 

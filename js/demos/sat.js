@@ -14,7 +14,32 @@ window.DEMOS.sat = function (el) {
     { q: "The author's ____ style, packed with detail, frustrated some readers.", o: ["terse", "succinct", "prolix", "pithy"], a: 2, pair: "prolix ↔ terse" },
   ];
   const ROUND = 5;
-  let round, i, score, picked;
+  let round, i, score, picked, actx = null;
+
+  // The same little sound effects as the SAT Vocab Lab app (Web Audio, no files).
+  const SFX = {
+    correct: [[660, 0, 0.12, 0.11], [990, 0.08, 0.24, 0.11]],
+    wrong: [[247, 0, 0.16, 0.09, "triangle"], [196, 0.1, 0.26, 0.08, "triangle"]],
+    complete: [[523, 0, 0.14, 0.09], [659, 0.1, 0.14, 0.09], [784, 0.2, 0.14, 0.09], [1047, 0.3, 0.4, 0.11]],
+  };
+  function sound(name) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    actx = actx || new AC();
+    if (actx.state === "suspended") actx.resume();
+    const t0 = actx.currentTime + 0.01;
+    for (const [freq, at, dur, vol, type = "sine"] of SFX[name]) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t0 + at);
+      g.gain.setValueAtTime(0.0001, t0 + at);
+      g.gain.exponentialRampToValueAtTime(vol, t0 + at + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + dur);
+      o.connect(g).connect(actx.destination);
+      o.start(t0 + at);
+      o.stop(t0 + at + dur + 0.02);
+    }
+  }
 
   function newRound() {
     round = BANK.slice().sort(() => Math.random() - 0.5).slice(0, ROUND);
@@ -63,10 +88,16 @@ window.DEMOS.sat = function (el) {
 
   el.addEventListener("click", (e) => {
     const p = e.target.closest("[data-pick]");
-    if (p && picked === null) { picked = Number(p.dataset.pick); if (picked === round[i].a) score++; render(); }
-    if (e.target.closest("[data-next]")) { i++; picked = null; render(); }
+    if (p && picked === null) {
+      picked = Number(p.dataset.pick);
+      if (picked === round[i].a) score++;
+      sound(picked === round[i].a ? "correct" : "wrong");
+      render();
+    }
+    if (e.target.closest("[data-next]")) { i++; picked = null; if (i >= ROUND) sound("complete"); render(); }
     if (e.target.closest("[data-again]")) newRound();
   });
 
   newRound();
+  return () => { if (actx) actx.close().catch(() => {}); };
 };

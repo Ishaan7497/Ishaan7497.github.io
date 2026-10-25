@@ -26,6 +26,7 @@ window.DEMOS.cricket = function (el) {
     </div>
     <div class="cv-controls">
       <button type="button" class="p-btn p-btn-primary" data-cam>Turn on camera</button>
+      <button type="button" class="p-btn" data-sound aria-pressed="true">Sound on</button>
       <button type="button" class="p-btn" data-full>Full screen</button>
       <span class="p-note" data-status>Camera off: click the cards, use the buttons below, or press number keys.</span>
     </div>
@@ -144,6 +145,71 @@ window.DEMOS.cricket = function (el) {
     ctx.fillStyle = "rgb(18,12,10)"; ctx.fillRect(0, H - height, W, height);
     if (prog > 0) { ctx.fillStyle = prog < 1 ? PRIMARY : GOLD; ctx.fillRect(0, H - height, W * prog, height); }
   }
+
+  /* ── Sound (port of _make / _chord / SND, with the repo's mp3 overrides) ── */
+  const SR = 22050;
+  const SND_DEF = {
+    click: ["tones", [[880, 0.04, 0.30], [1320, 0.05, 0.25]]],
+    hover: ["tones", [[660, 0.03, 0.18]]],
+    run: ["tones", [[620, 0.06, 0.35], [820, 0.10, 0.40]]],
+    four: ["chords", [[[523, 659], 0.10, 0.45], [[659, 784], 0.10, 0.45], [[784, 988], 0.20, 0.55]]],
+    six: ["chords", [[[523, 659, 784], 0.10, 0.50], [[587, 740, 880], 0.10, 0.50], [[659, 831, 988], 0.10, 0.50], [[784, 988, 1175], 0.32, 0.65]]],
+    wicket: ["tones", [[440, 0.05, 0.45], [330, 0.10, 0.50], [220, 0.12, 0.55], [165, 0.20, 0.55]]],
+    out: ["tones", [[330, 0.18, 0.55], [247, 0.20, 0.55], [165, 0.30, 0.55], [110, 0.40, 0.50]]],
+    coin: ["tones", [[900, 0.04, 0.30], [1200, 0.04, 0.30], [900, 0.04, 0.25], [1200, 0.04, 0.30], [900, 0.04, 0.20], [1300, 0.05, 0.30]]],
+    toss_win: ["chords", [[[784, 988], 0.10, 0.50], [[1047, 1319], 0.20, 0.55]]],
+    win: ["chords", [[[392, 494], 0.10, 0.50], [[523, 659], 0.10, 0.50], [[659, 784], 0.10, 0.50], [[784, 988, 1175], 0.45, 0.65]]],
+    lose: ["chords", [[[330, 415], 0.18, 0.50], [[277, 349], 0.18, 0.50], [[220, 277], 0.20, 0.50], [[165, 196], 0.45, 0.45]]],
+    tie: ["tones", [[523, 0.12, 0.45], [494, 0.12, 0.45], [523, 0.30, 0.50]]],
+    crowd_cheer: ["chords", [[[220, 277, 330, 415], 0.30, 0.30], [[247, 311, 370, 466], 0.30, 0.35], [[262, 330, 392, 494], 0.40, 0.40], [[220, 277, 330, 392, 494], 0.80, 0.45]]],
+    crowd_aww: ["chords", [[[523, 466], 0.25, 0.35], [[466, 415], 0.30, 0.35], [[415, 370], 0.40, 0.35], [[370, 311], 0.60, 0.35]]],
+    out_call: ["chords", [[[260, 520, 1040], 0.05, 0.55], [[280, 560, 1120], 0.18, 0.65], [[300, 600, 1200], 0.18, 0.65], [[1800, 2400], 0.05, 0.55], [[1200, 1600], 0.04, 0.30]]],
+    stumps_hit: ["tones", [[80, 0.04, 0.7], [60, 0.06, 0.7], [40, 0.10, 0.6], [200, 0.04, 0.5], [150, 0.06, 0.4]]],
+  };
+  const OVERRIDES = ["crowd_cheer", "crowd_aww", "stumps_hit"]; // real clips shipped in the game's assets/
+  const audio = { ctx: null, buf: {}, on: true, master: null };
+  try { audio.on = localStorage.getItem("hc:sound") !== "off"; } catch (e) {}
+
+  function segment(freqs, dur, vol, rel) {
+    const n = Math.max(1, Math.floor(SR * dur)), out = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let s = 0; for (const f of freqs) s += Math.sin(2 * Math.PI * f * (i / SR)); out[i] = (s / freqs.length) * vol; }
+    const atk = Math.min(Math.floor(0.008 * SR), Math.floor(n / 4)), r = Math.min(Math.floor(rel * SR), Math.floor(n / 3));
+    for (let i = 0; i < atk; i++) out[i] *= i / atk;
+    for (let i = 0; i < r; i++) out[n - 1 - i] *= i / r;
+    return out;
+  }
+  function synth(kind, parts) {
+    const segs = parts.map((p) => (kind === "tones" ? segment([p[0]], p[1], p[2], 0.03) : segment(p[0], p[1], p[2], 0.04)));
+    const len = segs.reduce((a, s) => a + s.length, 0), b = audio.ctx.createBuffer(1, len, SR), ch = b.getChannelData(0);
+    let o = 0;
+    for (const s of segs) { for (let i = 0; i < s.length; i++) ch[o + i] = Math.max(-1, Math.min(1, s[i])); o += s.length; }
+    return b;
+  }
+  function unlockAudio() {
+    if (!audio.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio.ctx = new AC();
+      audio.master = audio.ctx.createGain();
+      audio.master.gain.value = 0.6;
+      audio.master.connect(audio.ctx.destination);
+      for (const [name, [kind, parts]] of Object.entries(SND_DEF)) audio.buf[name] = synth(kind, parts);
+      for (const name of OVERRIDES) {
+        fetch(`assets/sounds/${name}.mp3`).then((r) => r.arrayBuffer()).then((ab) => audio.ctx.decodeAudioData(ab))
+          .then((b) => { audio.buf[name] = b; }).catch(() => {});
+      }
+    }
+    if (audio.ctx.state === "suspended") audio.ctx.resume();
+  }
+  function play(name) {
+    if (!audio.on || !audio.ctx || !audio.buf[name]) return;
+    const src = audio.ctx.createBufferSource();
+    src.buffer = audio.buf[name];
+    src.connect(audio.master);
+    src.start();
+  }
+  const timers = new Set();
+  function playLater(name, delay) { const id = setTimeout(() => { timers.delete(id); if (alive) play(name); }, delay * 1000); timers.add(id); }
 
   /* ── Effects (port of Particles / Confetti / FX) ── */
   function particles(cx, cy, count = 65, gravity = 0.45, speed = [4, 15], life = [35, 90]) {
@@ -316,13 +382,17 @@ window.DEMOS.cricket = function (el) {
     return null;
   }
   const CELEB = {
-    OUT_BATTING: { label: "OUT!", color: "rgb(255,60,60)", subtext: null, prompt: null, duration: 2.8 },
-    WICKET_BOWLING: { label: "WICKET!", color: PRIMARY, subtext: null, prompt: "RAISE YOUR HAND TO CELEBRATE", duration: 3.5 },
+    OUT_BATTING: { label: "OUT!", color: "rgb(255,60,60)", subtext: null, prompt: null, duration: 2.8, auto: [["stumps_hit", 0], ["out_call", 0.15], ["crowd_aww", 0.55]] },
+    WICKET_BOWLING: { label: "WICKET!", color: PRIMARY, subtext: null, prompt: "RAISE YOUR HAND TO CELEBRATE", duration: 3.5, auto: [["stumps_hit", 0], ["out_call", 0.15], ["crowd_cheer", 0.5]] },
     FIFTY: { label: "FIFTY!", color: GOLD, subtext: "50 RUNS", prompt: "RAISE YOUR HAND TO CELEBRATE", duration: 3.5 },
     HUNDRED: { label: "HUNDRED!", color: PRIMARY, subtext: "100 RUNS: CENTURY!", prompt: "RAISE YOUR HAND TO CELEBRATE", duration: 4.0 },
     MATCH_WIN: { label: "YOU WIN!", color: PRIMARY, subtext: "Victory!", prompt: "RAISE YOUR HAND TO CELEBRATE", duration: 4.5 },
-    MATCH_LOSE: { label: "DEFEAT", color: RED, subtext: "Better luck next time", prompt: null, duration: 3.0 },
+    MATCH_LOSE: { label: "DEFEAT", color: RED, subtext: "Better luck next time", prompt: null, duration: 3.0, auto: [["crowd_aww", 0]] },
   };
+  function enterCelebration(kind, post) {
+    Object.assign(g, { pendingCelebration: kind, postCelebration: post, celebrationStart: now(), celebrationAck: false, state: "CELEBRATION" });
+    for (const [name, delay] of CELEB[kind].auto || []) playLater(name, delay);
+  }
 
   /* ── Screens (ports of the screen_* functions) ── */
   function topbar() {
@@ -496,6 +566,7 @@ window.DEMOS.cricket = function (el) {
       glowText(cfg.prompt, W / 2, H * 0.62, 1.0, cfg.color, true, 2, true);
       text("(or wait to skip)", W / 2, H * 0.7, 0.6, TEXT_MUTE, false, true, true);
       if (isHandRaised(hands) || pending === "celebrate") {
+        play("crowd_cheer");
         g.celebrationAck = true;
         g.celebrationStart = now() - cfg.duration * 0.55;
         fx.trigger("FLASH", { col: cfg.color });
@@ -560,6 +631,7 @@ window.DEMOS.cricket = function (el) {
         g.mode = ["1 to 6", "1 to 10", "CRAZY"][conf - 1];
         g.runRange = [range(1, 7), range(1, 11), range(1, 11)][conf - 1];
         g.state = "DIFFICULTY_SELECT";
+        play("click");
       }
     } else if (state === "DIFFICULTY_SELECT") {
       menu("DIFFICULTY", GOLD, "How smart should the CPU be?", [["EASY", "Random: pure fun", PRIMARY, 1], ["MEDIUM", "Notices your patterns", GOLD, 2], ["HARD", "Tracks and counters you", RED, 3]], sel, prog);
@@ -567,13 +639,14 @@ window.DEMOS.cricket = function (el) {
         [dlbl, dkey] = { 1: [" EASY", "EASY"], 2: ["MEDIUM", "MEDIUM"], 3: ["  HARD", "HARD"] }[conf];
         brain.diff = dkey; brain.hist = [];
         g.state = "TOSS_CHOICE";
+        play("click");
       }
     } else if (state === "TOSS_CHOICE") {
       const y1 = sheet(196);
       glowText("TOSS: CALL IT", 40, y1 + 46, 0.95, GOLD, true, 2);
       text("Odd or even? Hold up 1 finger for ODD, 2 for EVEN.", 40, y1 + 84, 0.66, TEXT_DIM);
       twoOptions(y1 + 106, [[1, "ODD", PRIMARY], [2, "EVEN", GOLD]], sel, prog);
-      if ([1, 2].includes(conf)) { g.tossChoice = conf === 1 ? "ODD" : "EVEN"; g.state = "TOSS_NUMBER"; }
+      if ([1, 2].includes(conf)) { g.tossChoice = conf === 1 ? "ODD" : "EVEN"; g.state = "TOSS_NUMBER"; play("click"); }
     } else if (state === "TOSS_NUMBER") {
       const y1 = sheet(196);
       const x = drawPill(40, y1 + 42, `YOU CALLED ${g.tossChoice}`, PRIMARY, 0.6);
@@ -584,24 +657,25 @@ window.DEMOS.cricket = function (el) {
         const cn = randint(1, 2), tot = conf + cn, rs = tot % 2 === 0 ? "EVEN" : "ODD", won = rs === g.tossChoice;
         Object.assign(g, { tossUserNum: conf, tossCompNum: cn, tossTotal: tot, tossResultStr: rs, userWonToss: won, coinTimer: 0, coinStart: now() });
         if (!won) { const dec = choice(["BAT", "BOWL"]); Object.assign(g, { tossCompDec: dec, userBatting: dec === "BOWL", battingFirst: dec === "BOWL" ? "user" : "computer" }); }
+        play("coin");
         g.state = "COIN_ANIM";
       }
     } else if (state === "COIN_ANIM") {
       g.coinTimer = Math.floor((now() - g.coinStart) * 30); // 30 "frames" per second, like the webcam loop
       drawCoin(g.coinTimer);
-      if (g.coinTimer >= COIN_DUR) g.state = "TOSS_RESULT";
+      if (g.coinTimer >= COIN_DUR) { g.state = "TOSS_RESULT"; if (g.userWonToss) play("toss_win"); }
     } else if (state === "TOSS_RESULT") {
       const y1 = sheet(214);
       text(`You ${g.tossUserNum} + CPU ${g.tossCompNum} = ${g.tossTotal}  (${g.tossResultStr})`, 40, y1 + 36, 0.68, TEXT_DIM);
       if (g.userWonToss) {
         glowText("YOU WON THE TOSS!", 40, y1 + 82, 1.0, PRIMARY, true, 2);
         twoOptions(y1 + 112, [[1, "BAT", PRIMARY], [2, "BOWL", BLUE]], sel, prog);
-        if ([1, 2].includes(conf)) { g.userBatting = conf === 1; g.battingFirst = conf === 1 ? "user" : "computer"; g.currentRuns = 0; g.state = "PLAYING"; }
+        if ([1, 2].includes(conf)) { g.userBatting = conf === 1; g.battingFirst = conf === 1 ? "user" : "computer"; g.currentRuns = 0; g.state = "PLAYING"; play("click"); }
       } else {
         glowText("YOU LOST THE TOSS", 40, y1 + 82, 1.0, RED, true, 2);
         text(`CPU chose to ${g.tossCompDec}, so you ${g.tossCompDec === "BAT" ? "bowl" : "bat"} first.`, 40, y1 + 128, 0.78, GOLD, true);
         text("Show any gesture to start", 40, y1 + 176, 0.64, TEXT_DIM);
-        if (conf !== null) { g.currentRuns = 0; g.state = "PLAYING"; }
+        if (conf !== null) { g.currentRuns = 0; g.state = "PLAYING"; play("click"); }
       }
     } else if (state === "PLAYING") {
       screenPlay();
@@ -619,20 +693,20 @@ window.DEMOS.cricket = function (el) {
           else { fx.trigger("FLASH", { col: PRIMARY }); g.pendingCelebration = "WICKET_BOWLING"; }
         } else if (isSix || isTen || isSq) {
           const lbl = isSix ? "SIX!" : isTen ? "TEN!" : `${bv}^2=${runs}!`;
-          if (g.userBatting) { fx.trigger("BIGRUN", { lbl }); fx.trigger("RUN_POP", { runs, col: GOLD }); }
-          else { fx.trigger("FLASH", { col: "rgb(200,60,60)" }); fx.trigger("RUN_POP", { runs, col: "rgb(240,100,80)" }); }
+          if (g.userBatting) { fx.trigger("BIGRUN", { lbl }); fx.trigger("RUN_POP", { runs, col: GOLD }); play("six"); }
+          else { fx.trigger("FLASH", { col: "rgb(200,60,60)" }); fx.trigger("RUN_POP", { runs, col: "rgb(240,100,80)" }); play("out"); }
         } else if (isFour) {
-          if (g.userBatting) { fx.trigger("FLASH", { col: "rgb(90,230,160)" }); fx.trigger("RUN_POP", { runs, col: PRIMARY }); }
-          else { fx.trigger("FLASH", { col: "rgb(200,80,80)" }); fx.trigger("RUN_POP", { runs, col: "rgb(240,100,80)" }); }
-        } else if (g.userBatting) { fx.trigger("FLASH", { col: PRIMARY }); fx.trigger("RUN_POP", { runs, col: PRIMARY }); }
-        else { fx.trigger("FLASH", { col: "rgb(130,70,70)" }); fx.trigger("RUN_POP", { runs, col: "rgb(220,130,120)" }); }
+          if (g.userBatting) { fx.trigger("FLASH", { col: "rgb(90,230,160)" }); fx.trigger("RUN_POP", { runs, col: PRIMARY }); play("four"); }
+          else { fx.trigger("FLASH", { col: "rgb(200,80,80)" }); fx.trigger("RUN_POP", { runs, col: "rgb(240,100,80)" }); play("run"); }
+        } else if (g.userBatting) { fx.trigger("FLASH", { col: PRIMARY }); fx.trigger("RUN_POP", { runs, col: PRIMARY }); play("run"); }
+        else { fx.trigger("FLASH", { col: "rgb(130,70,70)" }); fx.trigger("RUN_POP", { runs, col: "rgb(220,130,120)" }); play("hover"); }
         if (g.userBatting && !out) { const m = checkMilestone(g); if (m) g.pendingCelebration = m; }
       }
     } else if (state === "BALL_RESULT") {
       screenBallResult();
       if (now() - (g.ballTimer || now()) > PAUSE_SECONDS) {
         const upd = endOfBallUpdate(g);
-        if (g.pendingCelebration) { g.postCelebration = upd; g.celebrationStart = now(); g.celebrationAck = false; g.state = "CELEBRATION"; }
+        if (g.pendingCelebration) enterCelebration(g.pendingCelebration, upd);
         else Object.assign(g, upd);
       }
     } else if (state === "CELEBRATION") {
@@ -645,17 +719,20 @@ window.DEMOS.cricket = function (el) {
       }
     } else if (state === "INNINGS_BREAK") {
       screenInningsBreak();
-      if (conf !== null) g.state = "PLAYING";
+      if (conf !== null) { g.state = "PLAYING"; play("click"); }
     } else if (state === "GAME_RESULT") {
       screenGameResult(sel, prog);
       const [s1, s2] = g.inningsScores, [u, c] = g.battingFirst === "user" ? [s1, s2] : [s2, s1];
-      if (!g.resultSoundPlayed && u !== null && c !== null) { if (u > c) { fx.trigger("WIN"); fx.confettiOn(); } g.resultSoundPlayed = true; }
-      if (!g.matchCelebrationShown && u !== null && c !== null && u !== c) {
-        g.matchCelebrationShown = true; g.pendingCelebration = u > c ? "MATCH_WIN" : "MATCH_LOSE";
-        g.celebrationStart = now(); g.celebrationAck = false; g.postCelebration = { state: "GAME_RESULT" }; g.state = "CELEBRATION";
+      if (!g.resultSoundPlayed && u !== null && c !== null) {
+        if (u > c) { fx.trigger("WIN"); fx.confettiOn(); play("win"); } else play(c > u ? "lose" : "tie");
+        g.resultSoundPlayed = true;
       }
-      if (conf === 1) { g = newGame(); fx.clear(); }
-      else if (conf === 2) { g = newGame(); fx.clear(); if (cam.on) stopCam(); }
+      if (!g.matchCelebrationShown && u !== null && c !== null && u !== c) {
+        g.matchCelebrationShown = true;
+        enterCelebration(u > c ? "MATCH_WIN" : "MATCH_LOSE", { state: "GAME_RESULT" });
+      }
+      if (conf === 1) { g = newGame(); fx.clear(); play("click"); }
+      else if (conf === 2) { g = newGame(); fx.clear(); play("click"); if (cam.on) stopCam(); }
     }
     pending = null;
 
@@ -702,6 +779,22 @@ window.DEMOS.cricket = function (el) {
     fallbackKey = key;
     q("[data-fallback]").innerHTML = ch.map(([n, l]) => `<button type="button" class="${g.state === "PLAYING" ? "num-btn" : "p-btn"}" data-n="${n}">${l}</button>`).join("");
   }
+  // Browsers only allow audio after the visitor interacts, so any click or key unlocks it.
+  el.addEventListener("pointerdown", unlockAudio);
+  function renderSound() {
+    const b = q("[data-sound]");
+    b.textContent = audio.on ? "Sound on" : "Sound off";
+    b.setAttribute("aria-pressed", String(audio.on));
+  }
+  q("[data-sound]").addEventListener("click", () => {
+    audio.on = !audio.on;
+    try { localStorage.setItem("hc:sound", audio.on ? "on" : "off"); } catch (e) {}
+    renderSound();
+    unlockAudio();
+    play("click");
+  });
+  renderSound();
+
   q("[data-fallback]").addEventListener("click", (e) => {
     const b = e.target.closest("[data-n]");
     if (b) pending = b.dataset.n === "celebrate" ? "celebrate" : Number(b.dataset.n);
@@ -720,7 +813,7 @@ window.DEMOS.cricket = function (el) {
     if (document.querySelector("dialog[open]")) return;
     const r = el.getBoundingClientRect();
     if (r.bottom < 0 || r.top > innerHeight) return;
-    if (/^[0-9]$/.test(e.key)) { pending = e.key === "0" ? 10 : Number(e.key); e.preventDefault(); }
+    if (/^[0-9]$/.test(e.key)) { unlockAudio(); pending = e.key === "0" ? 10 : Number(e.key); e.preventDefault(); }
   }
   document.addEventListener("keydown", onKey);
 
@@ -773,6 +866,14 @@ window.DEMOS.cricket = function (el) {
   q("[data-cam]").addEventListener("click", startCam);
 
   g = newGame();
+  step(); // draw the first screen and its buttons right away
   raf = requestAnimationFrame(loop);
-  return () => { alive = false; cancelAnimationFrame(raf); stopCam(); document.removeEventListener("keydown", onKey); };
+  return () => {
+    alive = false;
+    cancelAnimationFrame(raf);
+    stopCam();
+    document.removeEventListener("keydown", onKey);
+    timers.forEach(clearTimeout);
+    if (audio.ctx) audio.ctx.close().catch(() => {});
+  };
 };

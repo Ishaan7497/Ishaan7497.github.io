@@ -66,15 +66,36 @@
       `<a class="p-btn" href="${code}" target="_blank" rel="noopener">View code ↗</a>`;
 
     if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
+    // Each demo gets a brand-new container, so listeners from the previous one are dropped with it.
     demoEl.innerHTML = "";
     demoEl.classList.remove("enter");
     void demoEl.offsetWidth;
     demoEl.classList.add("enter");
+    renderHowTo(p);
+    const host = document.createElement("div");
+    host.className = "demo-host";
+    demoEl.appendChild(host);
     const demo = window.DEMOS && window.DEMOS[p.id];
-    if (demo) cleanup = demo(demoEl) || null;
-    else demoEl.innerHTML = `<p class="p-note">Demo coming soon.</p>`;
+    if (demo) cleanup = demo(host) || null;
+    else host.innerHTML = `<p class="p-note">Demo coming soon.</p>`;
 
     if (fromUser) history.replaceState(null, "", "#projects/" + p.id);
+  }
+
+  // "How to play" / "How it works" box above each demo. Its open/closed state is remembered.
+  let howToOpen = true;
+  try { howToOpen = localStorage.getItem("howto") !== "closed"; } catch (e) {}
+  function renderHowTo(p) {
+    const box = $("#pHowTo");
+    if (!p.howTo) { box.innerHTML = ""; return; }
+    box.innerHTML = `<details class="howto" ${howToOpen ? "open" : ""}>
+      <summary>${esc(p.howToTitle || "How to play")}</summary>
+      <ol>${p.howTo.map((step) => `<li>${step}</li>`).join("")}</ol>
+    </details>`;
+    box.querySelector("details").addEventListener("toggle", (e) => {
+      howToOpen = e.target.open;
+      try { localStorage.setItem("howto", howToOpen ? "open" : "closed"); } catch (err) {}
+    });
   }
 
   const fromHash = location.hash.match(/^#projects\/(.+)$/);
