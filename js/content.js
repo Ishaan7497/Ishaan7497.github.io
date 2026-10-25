@@ -26,9 +26,9 @@ window.SITE = {
       kind: "Quant · Python, pandas",
       theme: "quant",
       blurb:
-        "Tests moving-average crossover strategies against buy-and-hold, with parameter sweeps, " +
-        "stop-loss / take-profit rules and rolling windows. Drag the sliders to run a backtest on a simulated market.",
-      stack: ["Python", "pandas", "time series", "risk management"],
+        "Tests a moving-average crossover strategy against buy-and-hold on real stock prices, with no lookahead bias. " +
+        "Pick a stock and dates, then drag the averages or tap a preset to re-run it.",
+      stack: ["Python", "pandas", "yfinance", "risk management"],
     },
     {
       id: "clipcourt",
@@ -57,12 +57,23 @@ window.SITE = {
       id: "cricket",
       repo: "Odd_or_Eve_CV",
       name: "Hand Cricket CV",
-      kind: "Computer vision · game AI",
+      kind: "Computer vision · webcam game",
       theme: "cricket",
       blurb:
-        "The classic Indian finger game against an adaptive AI, played with real-time hand-gesture " +
-        "recognition. Grew out of my command-line Odd-Or-Eve.",
-      stack: ["MediaPipe", "OpenCV", "Python"],
+        "Hand cricket against an adaptive CPU, controlled only by your fingers through a webcam. " +
+        "This is the real game ported to the browser: same screens, gestures and match engine.",
+      stack: ["MediaPipe", "OpenCV", "Python", "state machine"],
+    },
+    {
+      id: "oddoreve",
+      repo: "Odd-Or-Eve",
+      name: "Odd or Eve",
+      kind: "Python · command-line game",
+      theme: "terminal",
+      blurb:
+        "The original command-line version of hand cricket that Hand Cricket CV grew from: three modes, " +
+        "an odd/eve toss and super overs, running here in a terminal.",
+      stack: ["Python", "standard library", "pytest"],
     },
     {
       id: "hangman",

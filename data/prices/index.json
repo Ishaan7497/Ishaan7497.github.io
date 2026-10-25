@@ -1,0 +1,107 @@
+{
+ "updated": "2026-10-25",
+ "tickers": [
+  {
+   "ticker": "SPY",
+   "name": "S&P 500 ETF",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "QQQ",
+   "name": "Nasdaq-100 ETF",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "AAPL",
+   "name": "Apple",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "MSFT",
+   "name": "Microsoft",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "NVDA",
+   "name": "NVIDIA",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "AMZN",
+   "name": "Amazon",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "GOOGL",
+   "name": "Alphabet",
+   "first": "2004-08-19",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "META",
+   "name": "Meta",
+   "first": "2012-05-18",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "TSLA",
+   "name": "Tesla",
+   "first": "2010-06-29",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "NFLX",
+   "name": "Netflix",
+   "first": "2002-05-23",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "JPM",
+   "name": "JPMorgan Chase",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "KO",
+   "name": "Coca-Cola",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "XOM",
+   "name": "ExxonMobil",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "MU",
+   "name": "Micron",
+   "first": "2000-01-03",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "SNAP",
+   "name": "Snap",
+   "first": "2017-03-02",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "ROKU",
+   "name": "Roku",
+   "first": "2017-09-28",
+   "last": "2026-10-23"
+  },
+  {
+   "ticker": "PTON",
+   "name": "Peloton",
+   "first": "2019-09-26",
+   "last": "2026-10-23"
+  }
+ ]
+}
