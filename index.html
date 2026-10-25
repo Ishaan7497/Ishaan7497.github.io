@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ishaan Gupta · Portfolio</title>
+  <meta name="description" content="Ishaan Gupta: quant, computer vision and software projects you can try in your browser." />
+  <link rel="canonical" href="https://ishaan7497.github.io/" />
+  <meta name="theme-color" content="#FAFAF9" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ishaan7497.github.io/" />
+  <meta property="og:title" content="Ishaan Gupta · Portfolio" />
+  <meta property="og:description" content="I build models of markets, machines and games. Try every project in your browser." />
+  <meta property="og:image" content="https://ishaan7497.github.io/assets/avatar.jpg" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234F46E5'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='16' text-anchor='middle' fill='white'>IG</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top">Ishaan Gupta</a>
+      <nav aria-label="Primary">
+        <a href="#projects">Projects</a>
+        <a href="#research" data-section-link="research">Research</a>
+        <a href="#experience" data-section-link="experience">Experience</a>
+        <a href="#contact">Contact</a>
+        <a href="https://github.com/Ishaan7497" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section id="top" class="wrap hero">
+      <div class="hero-text">
+        <p class="pill">Grade 12 · Applying for Quantitative Finance, Math &amp; CS</p>
+        <h1>I build models of markets, machines <span class="accent">and games.</span></h1>
+        <p class="lede">I'm Ishaan. I write trading-strategy backtesters, build computer-vision systems that turn video into statistics, and ship tools people actually use. Every project below runs right here in your browser.</p>
+        <div class="btn-row">
+          <a class="btn btn-accent" href="#projects">Try my projects</a>
+          <a class="btn btn-outline" href="https://github.com/Ishaan7497" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn btn-ghost" href="#contact" id="heroEmail">Get in touch →</a>
+        </div>
+      </div>
+      <figure class="hero-photo">
+        <img src="assets/avatar.jpg" alt="Portrait of Ishaan Gupta" width="460" height="460" />
+        <figcaption>
+          <span>Currently building</span>
+          <strong>quant &amp; vision tools</strong>
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- Quick facts -->
+    <section class="wrap facts" aria-label="At a glance">
+      <div class="fact"><p class="fact-num">5</p><p>Projects you can play on this page</p></div>
+      <div class="fact"><p class="fact-num">349</p><p>Words in SAT Vocab Lab, live and CI-tested</p></div>
+      <div class="fact"><p class="fact-num">2</p><p>Computer-vision systems: YOLOv8 and MediaPipe</p></div>
+      <div class="fact"><p class="fact-num">3</p><p>Fields: quant finance, computer vision, web</p></div>
+    </section>
+
+    <!-- Projects playground -->
+    <section id="projects" class="wrap projects">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Projects</p>
+          <h2>Don't just read about them. Try them.</h2>
+        </div>
+        <p class="sec-sub">Pick a project. Each one is a working, in-browser version of the real thing, with links to the code and the full write-up.</p>
+      </div>
+
+      <div class="playground" id="playground" data-theme="quant">
+        <div class="tabs" role="tablist" aria-label="Projects" id="tabs"></div>
+        <div class="panel" role="tabpanel" id="panel" aria-live="polite">
+          <div class="panel-head">
+            <div class="panel-title">
+              <p class="panel-kind" id="pKind"></p>
+              <h3 id="pName"></h3>
+              <p class="panel-blurb" id="pBlurb"></p>
+            </div>
+            <div class="panel-actions" id="pActions"></div>
+          </div>
+          <div class="stack" id="pStack"></div>
+          <div class="demo" id="demo"></div>
+          <noscript><p>Turn on JavaScript to try the projects, or browse them on <a href="https://github.com/Ishaan7497" style="color:inherit">GitHub</a>.</p></noscript>
+        </div>
+      </div>
+    </section>
+
+    <!-- Research -->
+    <section id="research" class="band">
+      <div class="wrap split">
+        <div class="split-head">
+          <p class="eyebrow">Research</p>
+          <h2>Papers &amp; writing</h2>
+        </div>
+        <div class="split-body" id="researchList"></div>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section id="experience" class="band">
+      <div class="wrap split">
+        <div class="split-head">
+          <p class="eyebrow">Experience</p>
+          <h2>Internships &amp; work</h2>
+        </div>
+        <ol class="split-body" id="experienceList"></ol>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="wrap contact-wrap">
+      <div class="contact">
+        <div>
+          <h2>Let's talk.</h2>
+          <p>Admissions officers, researchers and fellow builders: I'd love to hear from you.</p>
+          <p class="contact-email" id="contactEmail"></p>
+        </div>
+        <div class="btn-row" id="contactLinks"></div>
+      </div>
+      <p class="foot">© <span id="year"></span> Ishaan Gupta · Built from scratch with HTML, CSS and JavaScript · <a href="https://github.com/Ishaan7497/Ishaan7497.github.io" target="_blank" rel="noopener">Source</a></p>
+    </section>
+  </main>
+
+  <!-- README viewer -->
+  <dialog id="readme" aria-labelledby="readmeTitle">
+    <div class="readme-head">
+      <h3 id="readmeTitle">Write-up</h3>
+      <div class="btn-row">
+        <a class="btn btn-outline btn-sm" id="readmeGh" target="_blank" rel="noopener">Open on GitHub</a>
+        <button class="btn btn-ghost btn-sm" id="readmeClose" aria-label="Close write-up">Close ✕</button>
+      </div>
+    </div>
+    <article class="readme-body" id="readmeBody"></article>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" defer></script>
+  <script src="js/content.js" defer></script>
+  <script src="js/demos/backtester.js" defer></script>
+  <script src="js/demos/clipcourt.js" defer></script>
+  <script src="js/demos/sat.js" defer></script>
+  <script src="js/demos/cricket.js" defer></script>
+  <script src="js/demos/hangman.js" defer></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>
