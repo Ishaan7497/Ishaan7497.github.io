@@ -45,14 +45,16 @@ window.SITE = {
       kind: "Computer vision · YOLOv8",
       theme: "court",
       blurb:
-        "Turns basketball footage into made/miss highlight clips, a shot chart and per-player stats. " +
-        "Mark the rim once and the pipeline does the rest.",
-      stack: ["YOLOv8", "OpenCV", "FastAPI"],
-      howToTitle: "How it works",
+        "Turns any basketball footage into made/miss highlight clips, a shot chart and stats. " +
+        "Upload a video below: the same YOLOv8 detector and shot logic run right in your browser, and the video never leaves your device.",
+      stack: ["YOLOv8", "OpenCV", "FastAPI", "WebGPU"],
+      howToTitle: "How to use it",
       howTo: [
-        "ClipCourt watches basketball video, finds the ball and the rim with a YOLOv8 model, and decides whether each shot went in.",
-        "This demo simulates a game in the same output format: every dot on the court is one shot. <b>Orange</b> dots went in, <b>hollow</b> dots missed.",
-        "Filter to made or missed shots, read shooting % by zone (paint, mid-range, three), and press <b>Simulate another game</b> for a new one.",
+        "<b>Upload</b> a basketball video (MP4 or MOV works best). It stays on your device.",
+        "<b>Mark the rim:</b> scrub to a frame where the hoop is clear and drag a tight box around the rim, or press <b>Suggest rim automatically</b>.",
+        "<b>Find my highlights:</b> YOLOv8 finds the ball in every frame, a tracker follows it, and a shot counts as <b>made</b> only if the ball is measured dropping through the rim. The first run downloads the 45 MB detector.",
+        "<b>Watch the results:</b> play or save each clip, see where shots came from on the chart, and download a CSV. <b>Medium</b>-confidence calls are worth a second look.",
+        "No footage handy? Open the <b>Example game</b> tab to see a simulated shot chart.",
       ],
     },
     {

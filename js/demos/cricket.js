@@ -21,6 +21,16 @@ window.DEMOS.cricket = function (el) {
   const PAUSE_SECONDS = 1.2, COIN_DUR = 45, HOLD = 1.3, GRACE = 0.15, QUIT_HOLD = 3.0;
 
   el.innerHTML = `
+    <details class="hc-guide" open>
+      <summary>Gesture guide</summary>
+      <ul>
+        <li><b>1</b> index finger</li><li><b>2</b> index + middle</li><li><b>3</b> index + middle + ring</li>
+        <li><b>4</b> four fingers, thumb folded</li><li><b>5</b> open hand</li><li><b>6</b> thumb only</li>
+        <li><b>7</b> thumb + index</li><li><b>8</b> thumb + index + middle</li><li><b>9</b> thumb + index + middle + ring</li>
+        <li><b>10</b> both hands closed, held together</li>
+      </ul>
+      <p class="p-note">Use one hand for 1–9. Hold the gesture until the ring fills (1.3 s). Choosing QUIT (or holding two fists for 3 s) ends the game, leaves full screen and turns the camera off. Video never leaves your device.</p>
+    </details>
     <div class="cv-wrap" data-wrap>
       <canvas class="cv-canvas" width="${W}" height="${H}" data-cv role="img" aria-label="Hand Cricket game screen"></canvas>
     </div>
@@ -30,17 +40,7 @@ window.DEMOS.cricket = function (el) {
       <button type="button" class="p-btn" data-full>Full screen</button>
       <span class="p-note" data-status>Camera off: click the cards, use the buttons below, or press number keys.</span>
     </div>
-    <div class="cv-fallback" role="group" aria-label="Choices" data-fallback></div>
-    <details class="hc-guide">
-      <summary>Gesture guide</summary>
-      <ul>
-        <li><b>1</b> index finger</li><li><b>2</b> index + middle</li><li><b>3</b> index + middle + ring</li>
-        <li><b>4</b> four fingers, thumb folded</li><li><b>5</b> open hand</li><li><b>6</b> thumb only</li>
-        <li><b>7</b> thumb + index</li><li><b>8</b> thumb + index + middle</li><li><b>9</b> thumb + index + middle + ring</li>
-        <li><b>10</b> both hands closed, held together</li>
-      </ul>
-      <p class="p-note">Use one hand for 1–9. Hold the gesture until the ring fills (1.3 s). Video never leaves your device.</p>
-    </details>`;
+    <div class="cv-fallback" role="group" aria-label="Choices" data-fallback></div>`;
 
   const q = (s) => el.querySelector(s);
   const cv = q("[data-cv]"), ctx = cv.getContext("2d");
@@ -620,7 +620,7 @@ window.DEMOS.cricket = function (el) {
     let [conf, prog] = gc.update(raw);
     if (pending !== null && pending !== "celebrate" && conf === null && valid.includes(pending)) { conf = pending; prog = 0; }
     const quitProg = quitDet.update(hands);
-    if (quitProg >= 1) { stopCam(); g = newGame(); fx.clear(); gc.reset(); quitDet.start = null; }
+    if (quitProg >= 1) { quitGame(); quitDet.start = null; }
     const sel = raw;
 
     if (!["MODE_SELECT", "DIFFICULTY_SELECT"].includes(state)) topbar();
@@ -732,7 +732,7 @@ window.DEMOS.cricket = function (el) {
         enterCelebration(u > c ? "MATCH_WIN" : "MATCH_LOSE", { state: "GAME_RESULT" });
       }
       if (conf === 1) { g = newGame(); fx.clear(); play("click"); }
-      else if (conf === 2) { g = newGame(); fx.clear(); play("click"); if (cam.on) stopCam(); }
+      else if (conf === 2) { play("click"); quitGame(); }
     }
     pending = null;
 
@@ -854,6 +854,19 @@ window.DEMOS.cricket = function (el) {
       btn.disabled = false;
     }
   }
+  // QUIT: like closing the OpenCV window. Back to the start screen, out of full screen, camera off.
+  function quitGame() {
+    g = newGame();
+    fx.clear();
+    gc.reset();
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    stopCam();
+    q("[data-status]").textContent = "Game closed and camera turned off. Turn it back on to play again.";
+  }
+  // Don't keep the webcam running while the visitor is on another tab.
+  function onHidden() { if (document.hidden && cam.on) stopCam(); }
+  document.addEventListener("visibilitychange", onHidden);
+
   function stopCam() {
     cam.on = false;
     if (cam.stream) cam.stream.getTracks().forEach((t) => t.stop());
@@ -872,7 +885,9 @@ window.DEMOS.cricket = function (el) {
     alive = false;
     cancelAnimationFrame(raf);
     stopCam();
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     document.removeEventListener("keydown", onKey);
+    document.removeEventListener("visibilitychange", onHidden);
     timers.forEach(clearTimeout);
     if (audio.ctx) audio.ctx.close().catch(() => {});
   };

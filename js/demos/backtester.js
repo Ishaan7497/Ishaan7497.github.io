@@ -24,7 +24,7 @@ window.DEMOS.backtester = function (el) {
   el.innerHTML = `
     <div class="bt-modes" role="tablist" aria-label="Mode">
       <span class="bt-kw">MODE =</span>
-      ${["single", "sweep", "multi_stock"].map((m) => `<button type="button" role="tab" class="bt-mode" data-mode="${m}">"${m}"</button>`).join("")}
+      ${["single", "sweep", "multi_stock"].map((m) => `<button type="button" role="tab" class="bt-mode" data-mode="${m}">${m}</button>`).join("")}
     </div>
     <p class="bt-mode-help" data-mode-help></p>
 
@@ -110,7 +110,7 @@ window.DEMOS.backtester = function (el) {
   /* ── Data ── */
   async function loadIndex() {
     index = await (await fetch("data/prices/index.json")).json();
-    q("[data-ticker]").innerHTML = index.tickers.map((t) => `<option value="${t.ticker}">"${t.ticker}"  · ${t.name}</option>`).join("");
+    q("[data-ticker]").innerHTML = index.tickers.map((t) => `<option value="${t.ticker}">${t.ticker} · ${t.name}</option>`).join("");
     q("[data-updated]").textContent = `through ${index.tickers[0].last}`;
   }
   async function load(t) {
@@ -493,7 +493,7 @@ window.DEMOS.backtester = function (el) {
     el.querySelectorAll('[data-row="ticker"]').forEach((r) => r.classList.toggle("unused", s.mode === "multi_stock"));
     el.querySelectorAll('[data-row="sweep"]').forEach((r) => r.classList.toggle("unused", s.mode !== "sweep"));
     el.querySelectorAll('[data-row="multi"]').forEach((r) => r.classList.toggle("unused", s.mode !== "multi_stock"));
-    const list = (k, opts) => (q(`[data-list="${k}"]`).innerHTML = opts.map((v) => `<button type="button" class="p-chip" data-toggle="${k}" data-v="${v}" aria-pressed="${s[k].includes(v)}">${k === "tickers" ? `"${v}"` : v}</button>`).join(""));
+    const list = (k, opts) => (q(`[data-list="${k}"]`).innerHTML = opts.map((v) => `<button type="button" class="p-chip" data-toggle="${k}" data-v="${v}" aria-pressed="${s[k].includes(v)}">${v}</button>`).join(""));
     list("sweepFast", SWEEP_FAST_OPTS); list("sweepSlow", SWEEP_SLOW_OPTS);
     if (index) list("tickers", index.tickers.map((t) => t.ticker));
     q("[data-periods]").innerHTML = PERIODS.map(([c]) => `<button type="button" class="p-chip" data-period="${c}">${c}</button>`).join("");
